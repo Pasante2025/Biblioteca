@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Códigos de Barras</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Biblioteca Digital</h1>
+        <nav>
+            <ul>
+                <li><a href="#inicio" class="active" data-page="inicio">Inicio</a></li>
+                <li><a href="#generador" data-page="generador">Generador de Códigos</a></li>
+                <li><a href="#historial" data-page="historial">Historial de Códigos</a></li>
+                <li><a href="#catalogo" data-page="catalogo">Catálogo de Códigos</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Página de Inicio -->
+        <section id="inicio" class="page active">
+            <div class="container">
+                <h2>Bienvenido al Sistema de Gestión de Códigos de Barras</h2>
+                <p>Esta aplicación le permite generar, almacenar y gestionar códigos de barras para su biblioteca.</p>
+                <div class="feature-container">
+                    <div class="feature">
+                        <h3>Generador de Códigos</h3>
+                        <p>Cree códigos de barras para libros que no los tienen o registre los existentes.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Historial de Códigos</h3>
+                        <p>Acceda y modifique todos los códigos generados previamente.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Catálogo de Códigos</h3>
+                        <p>Escanee códigos y localice rápidamente libros en su biblioteca.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página del Generador de Códigos -->
+        <section id="generador" class="page">
+            <div class="container">
+                <h2>Generador de Códigos de Barras</h2>
+                <div class="form-container">
+                    <form id="barcode-form">
+                        <div class="form-group">
+                            <label for="codigo">Código de Barras:</label>
+                            <div class="codigo-container">
+                                <input type="text" id="codigo" name="codigo" placeholder="Ingrese el código (si existe)" maxlength="13">
+                                <button type="button" id="generar-codigo">Generar Código</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="titulo">Título del Libro:</label>
+                            <input type="text" id="titulo" name="titulo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="autor">Autor:</label>
+                            <input type="text" id="autor" name="autor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editorial">Editorial:</label>
+                            <input type="text" id="editorial" name="editorial" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="anio">Año:</label>
+                            <input type="number" id="anio" name="anio" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estado">Estado:</label>
+                            <select id="estado" name="estado" required>
+                                <option value="">Seleccione un estado</option>
+                                <option value="Nuevo">Nuevo</option>
+                                <option value="Bueno">Bueno</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Deteriorado">Deteriorado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="modulo">Módulo:</label>
+                            <input type="text" id="modulo" name="modulo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="seccion">Sección del Estante:</label>
+                            <input type="text" id="seccion" name="seccion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="imagen-libro">Imagen del Libro:</label>
+                            <input type="file" id="imagen-libro" name="imagen-libro" accept="image/*">
+                        </div>
+                        <div class="barcode-preview">
+                            <h3>Vista Previa del Código de Barras</h3>
+                            <div id="barcode-container">
+                                <svg id="barcode"></svg>
+                            </div>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="button" id="preview-button">Vista Previa</button>
+                            <button type="submit" id="save-button">Guardar Código</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página de Historial de Códigos -->
+        <section id="historial" class="page">
+            <div class="container">
+                <h2>Historial de Códigos</h2>
+                <div class="search-container">
+                    <input type="text" id="historial-search" placeholder="Buscar código...">
+                </div>
+                <div class="table-container">
+                    <table id="historial-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Editorial</th>
+                                <th>Año</th>
+                                <th>Estado</th>
+                                <th>Módulo</th>
+                                <th>Sección</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historial-tbody">
+                            <!-- Datos del historial se cargarán dinámicamente aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal para editar libro -->
+            <div id="edit-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Editar Libro</h2>
+                    <form id="edit-form">
+                        <input type="hidden" id="edit-id">
+                        <div class="form-group">
+                            <label for="edit-codigo">Código de Barras:</label>
+                            <input type="text" id="edit-codigo" name="edit-codigo" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-titulo">Título del Libro:</label>
+                            <input type="text" id="edit-titulo" name="edit-titulo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-autor">Autor:</label>
+                            <input type="text" id="edit-autor" name="edit-autor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-editorial">Editorial:</label>
+                            <input type="text" id="edit-editorial" name="edit-editorial" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-anio">Año:</label>
+                            <input type="number" id="edit-anio" name="edit-anio" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-estado">Estado:</label>
+                            <select id="edit-estado" name="edit-estado" required>
+                                <option value="Nuevo">Nuevo</option>
+                                <option value="Bueno">Bueno</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Deteriorado">Deteriorado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-modulo">Módulo:</label>
+                            <input type="text" id="edit-modulo" name="edit-modulo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-seccion">Sección del Estante:</label>
+                            <input type="text" id="edit-seccion" name="edit-seccion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-imagen">Imagen del Libro:</label>
+                            <input type="file" id="edit-imagen" name="edit-imagen" accept="image/*">
+                            <div id="current-image-container"></div>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="submit">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página de Catálogo de Códigos -->
+        <section id="catalogo" class="page">
+            <div class="container">
+                <h2>Catálogo de Códigos</h2>
+                <div class="catalog-search">
+                    <div class="search-container">
+                        <input type="text" id="catalogo-search" placeholder="Buscar por título, autor o código...">
+                    </div>
+                    <div class="barcode-scanner">
+                        <button id="scan-button">Escanear Código</button>
+                        <input type="text" id="scanner-input" placeholder="Código escaneado">
+                    </div>
+                </div>
+                <div class="catalog-container" id="catalog-grid">
+                    <!-- Datos del catálogo se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+
+            <!-- Modal para detalles del libro -->
+            <div id="detail-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-detail">&times;</span>
+                    <div id="book-detail-container">
+                        <!-- Detalles del libro se cargarán aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Generador de Códigos de Barras para Biblioteca</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
